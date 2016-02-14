@@ -1,9 +1,9 @@
 function Snake() {
 
     var baseColor = new Color({hue: 0, saturation: 0.7, brightness: 0.8});
-    var speed = 6;
+    var speed = 10;
     var partsTotal = 11;
-    var partSize = 8;
+    var partSize = 4;
     var torque = 5;
     var width = 30;
     var startPoint = view.bounds.leftCenter - [30, 0];
