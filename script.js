@@ -4,7 +4,7 @@ function Snake() {
     var speed = 10;
     var partsTotal = 11;
     var partSize = 4;
-    var torque = 5;
+    var torque = 7;
     var width = 30;
     var startPoint = view.bounds.leftCenter - [30, 0];
 
