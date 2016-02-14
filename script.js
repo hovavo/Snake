@@ -171,18 +171,28 @@ prey.onFrame = function() {
 prey.reset = function () {
     this.aliveSkin.visible = true;
     this.deadSkin.visible = false;
+    prey.scaling = 0.8;
     this.caught = false;
-    this.eaten = false;
     this.life = this.lifeSpan;
-    this.position = Point.random() * view.size;
-    this.rotation = Math.random() * 360;
+    this.position = Point.random() * view.size / 2 + view.size / 4;
+    this.rotation = (view.center - this.position).angle;
+
 };
 
 prey.onMouseDown = function () {
     this.aliveSkin.visible = false;
     this.deadSkin.visible = true;
+    prey.scaling = 0.9;
     this.caught = true;
     snake.target = this.position;
+};
+
+prey.move = function () {
+    var v = new Point();
+    v.angle = this.rotation - 180;
+    v.length = 4;
+
+    this.position += v;
 };
 
 
@@ -203,6 +213,9 @@ function onFrame(event) {
     if ((prey.position - snake.head.position).length < 20) {
         // prey.eaten = true;
         prey.reset();
+    }
+    else if (!prey.caught) {
+        prey.move();
     }
 }
 
