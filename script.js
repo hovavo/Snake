@@ -187,7 +187,7 @@ prey.onFrame = function () {
 prey.catch = function () {
     this.aliveSkin.visible = false;
     this.deadSkin.visible = true;
-    this.scaling = 1.3;
+    this.scaling = 1.2;
     this.caught = true;
     snake.target = this.position;
 };
@@ -195,7 +195,7 @@ prey.catch = function () {
 prey.release = function () {
     this.aliveSkin.visible = true;
     this.deadSkin.visible = false;
-    this.scaling = 0.9;
+    this.scaling = 1;
     this.caught = false;
 };
 
