@@ -43,7 +43,7 @@ function Snake() {
 
     this.steer = function (delta, frame) {
         var a = delta.getDirectedAngle(this.head.velocityClean);
-        if (a < torque) {
+        if (a < 0 - torque) {
             this.head.velocityClean.angle += torque;
         }
         else if (a > torque) {
