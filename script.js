@@ -1,25 +1,27 @@
+var SPEED = 5;
+
+
 function Snake() {
 
-    var baseColor = new Color({hue: 0, saturation: 0.7, brightness: 0.8});
-    var speed = 10;
+    var baseColor = new Color({hue: 125, saturation: 0.5, brightness: 0.6});
+    var speed = SPEED;
     var partsTotal = 11;
-    var partSize = 4;
-    var torque = 7;
+    var partSize = Math.round(10 * (5 / speed));
+    var torque = speed;
     var width = 30;
-    var startPoint = view.bounds.leftCenter - [30, 0];
+    var startPoint = view.bounds.leftCenter - [width, 0];
 
     this.spine = createSpine();
     this.tail = createTail();
     this.body = createBody();
     this.head = createHead();
-
     this.target = view.center;
 
 
     this.update = function (frame) {
         var delta = this.target - this.head.position;
         if (delta.length > speed) {
-           this.steer(delta, frame);
+            this.steer(delta, frame);
         }
         else {
             this.target = Point.random() * view.size;
@@ -56,7 +58,7 @@ function Snake() {
         this.tail.position = this.spine.firstSegment.point;
     };
 
-    this.updateSpine = function (){
+    this.updateSpine = function () {
         this.spine.add(this.head.position);
         this.spine.lastSegment.direction = this.head.velocity.angle;
         this.spine.removeSegment(0);
@@ -64,7 +66,8 @@ function Snake() {
 
     this.updateBody = function () {
         var spine = this.spine;
-        this.body.children.forEach(function(part, offset) {
+        var swallowIndex = this.swallowPointIndex;
+        this.body.children.forEach(function (part, offset) {
             part.segments = [];
             for (var i = 0; i < partSize + 1; i++) {
                 var index = i + offset * partSize - 1;
@@ -74,9 +77,8 @@ function Snake() {
                 }
                 var segment = spine.segments[index];
 
-                var w = width / 2;
                 var delta = new Point();
-                delta.length = w;
+                delta.length = width / 2;
                 delta.angle = segment.direction + 90;
                 var top = segment.point + delta;
                 var bottom = segment.point - delta;
@@ -149,7 +151,6 @@ function Snake() {
 }
 
 
-
 var prey = project.importSVG(document.querySelector('#Pig'));
 prey.aliveSkin = prey.getItem({name: 'Alive'});
 prey.deadSkin = prey.getItem({name: 'Dead'});
@@ -158,7 +159,7 @@ prey.lifeSpan = 200;
 prey.scaling = 0.8;
 
 
-prey.onFrame = function() {
+prey.onFrame = function () {
     if (!this.caught) {
         this.life--;
     }
@@ -168,31 +169,44 @@ prey.onFrame = function() {
     }
 };
 
-prey.reset = function () {
-    this.aliveSkin.visible = true;
-    this.deadSkin.visible = false;
-    prey.scaling = 0.8;
-    this.caught = false;
-    this.life = this.lifeSpan;
-    this.position = Point.random() * view.size / 2 + view.size / 4;
-    this.rotation = (view.center - this.position).angle;
-
-};
-
-prey.onMouseDown = function () {
+prey.catch = function () {
     this.aliveSkin.visible = false;
     this.deadSkin.visible = true;
-    prey.scaling = 0.9;
+    this.scaling = 1;
     this.caught = true;
     snake.target = this.position;
 };
 
-prey.move = function () {
-    var v = new Point();
-    v.angle = this.rotation - 180;
-    v.length = 4;
+prey.release = function () {
+    this.aliveSkin.visible = true;
+    this.deadSkin.visible = false;
+    this.scaling = 0.9;
+    this.caught = false;
+};
 
-    this.position += v;
+prey.reset = function () {
+    this.release();
+    this.life = this.lifeSpan;
+    this.position = Point.random() * view.size / 2 + view.size / 4;
+    this.rotation = (view.center - this.position).angle;
+};
+
+prey.onMouseDown = function () {
+    this.catch();
+};
+
+prey.onMouseUp = function () {
+    this.release();
+};
+
+prey.move = function (frame) {
+    if (frame % 2 == 0) {
+        this.rotation += Math.random() * 6 - 3;
+        var v = new Point();
+        v.angle = this.rotation - 180;
+        v.length = 6 * (SPEED / 5);
+        this.position += v;
+    }
 };
 
 
@@ -208,6 +222,10 @@ function onMouseDrag(event) {
     snake.target = event.point;
 }
 
+function onMouseUp () {
+    prey.release();
+}
+
 function onFrame(event) {
     snake.update(event.count);
     if ((prey.position - snake.head.position).length < 20) {
@@ -215,7 +233,7 @@ function onFrame(event) {
         prey.reset();
     }
     else if (!prey.caught) {
-        prey.move();
+        prey.move(event.count);
     }
 }
 
