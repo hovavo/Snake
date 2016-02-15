@@ -105,7 +105,7 @@ function Snake() {
         var l = (5/SPEED) * 10;
         var p = (Math.abs(swallowIndex - index) < l) ? (l - Math.abs(swallowIndex - index)) / l : 0;
         p *= Math.PI / 2;
-        return Math.sin(p) * l * 2.5 * (index / pointsTotal) * (SPEED/5);
+        return Math.sin(p) * l * 3 * (index / pointsTotal) * (SPEED/5);
     }
 
     function createSpine() {
@@ -187,7 +187,7 @@ prey.onFrame = function () {
 prey.catch = function () {
     this.aliveSkin.visible = false;
     this.deadSkin.visible = true;
-    this.scaling = 1;
+    this.scaling = 1.2;
     this.caught = true;
     snake.target = this.position;
 };
