@@ -241,11 +241,11 @@ prey.onMouseUp = function () {
 prey.move = function (frame) {
     if (frame % 2 == 0) {
         this.rotation += Math.random() * 6 - 3;
-        var v = new Point();
-        v.angle = this.rotation - 180;
-        v.length = 6 * (SPEED / 5);
-        this.position += v;
     }
+    var v = new Point();
+    v.angle = this.rotation - 180;
+    v.length = 3 * (SPEED / 5);
+    this.position += v;
 };
 
 
