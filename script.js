@@ -101,11 +101,11 @@ function Snake() {
         })
     };
 
-    function calcWidth (index, swallowIndex) {
-        var l = (5/SPEED) * 10;
+    function calcWidth(index, swallowIndex) {
+        var l = (5 / SPEED) * 10;
         var p = (Math.abs(swallowIndex - index) < l) ? (l - Math.abs(swallowIndex - index)) / l : 0;
         p *= Math.PI / 2;
-        return Math.sin(p) * l * 3 * (index / pointsTotal) * (SPEED/5);
+        return Math.sin(p) * l * 3 * (index / pointsTotal) * (SPEED / 5);
     }
 
     function createSpine() {
@@ -165,6 +165,18 @@ function Snake() {
     }
 }
 
+var querySpeed = parseInt(window.location.search.substr(1));
+if (!isNaN(querySpeed)) {
+    SPEED = querySpeed;
+}
+
+
+var bg = new Shape.Rectangle(view.bounds);
+bg.fillColor = new Color({
+    hue: 300,
+    saturation: 0.1,
+    brightness: 0.2
+});
 
 var prey = project.importSVG(document.querySelector('#Pig'));
 prey.aliveSkin = prey.getItem({name: 'Alive'});
@@ -220,10 +232,10 @@ prey.reset = function () {
     var dest = new Point();
     if (axis == 0) {
         dest.x = view.bounds.width / 2;
-        dest.y = (1-Math.round(perc)) * view.bounds.height;
+        dest.y = (1 - Math.round(perc)) * view.bounds.height;
     }
     else {
-        dest.x = (1-Math.round(perc)) * view.bounds.width;
+        dest.x = (1 - Math.round(perc)) * view.bounds.width;
         dest.y = view.bounds.height / 2;
     }
 
@@ -248,13 +260,6 @@ prey.move = function (frame) {
     this.position += v;
 };
 
-
-var querySpeed = parseInt(window.location.search.substr(1));
-if (!isNaN(querySpeed)) {
-    SPEED = querySpeed;
-}
-
-
 var snake = new Snake();
 prey.reset();
 
@@ -267,7 +272,7 @@ function onMouseDrag(event) {
     snake.target = event.point;
 }
 
-function onMouseUp () {
+function onMouseUp() {
     prey.release();
 }
 
@@ -280,6 +285,10 @@ function onFrame(event) {
     else if (!prey.caught) {
         prey.move(event.count);
     }
+}
+
+function onResize() {
+    bg.bounds = view.bounds;
 }
 
 
