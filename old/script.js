@@ -39,10 +39,10 @@ function onFrame(event) {
     var delta = target - head.position;
     if (delta.length > speed) {
         var a = delta.getDirectedAngle(head.velocity);
-        if (a < 0 - torque) {
+        if (a < torque) {
             head.velocity.angle += torque;
         } 
-        else if (a > 0 + torque) {
+        else if (a > torque) {
             head.velocity.angle -= torque;
         }
         else {
