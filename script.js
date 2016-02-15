@@ -1,5 +1,4 @@
-var SPEED = 5;
-
+var SPEED = 7;
 
 function Snake() {
 
@@ -7,7 +6,8 @@ function Snake() {
     var speed = SPEED;
     var partsTotal = 11;
     var partSize = Math.round(10 * (5 / speed));
-    var torque = speed;
+    var pointsTotal = partSize * partsTotal;
+    var torque = speed * 0.75;
     var width = 30;
     var startPoint = view.bounds.leftCenter - [width, 0];
 
@@ -16,12 +16,20 @@ function Snake() {
     this.body = createBody();
     this.head = createHead();
     this.target = view.center;
+    this.swallowPointIndex = -1;
 
+    this.eat = function () {
+        this.swallowPointIndex = pointsTotal - 1;
+        var vec = this.head.velocity.clone();
+        vec.length = speed * 10;
+        this.target = this.head.position + vec;
+    };
 
     this.update = function (frame) {
         var delta = this.target - this.head.position;
         if (delta.length > speed) {
             this.steer(delta, frame);
+            this.swallowPointIndex -= 0.5;
         }
         else {
             this.target = Point.random() * view.size;
@@ -52,6 +60,7 @@ function Snake() {
     this.updateHead = function () {
         this.head.position += this.head.velocity;
         this.head.rotation = this.head.velocity.angle;
+        this.head.shape.radius = width / 2 + calcWidth(pointsTotal - 1, this.swallowPointIndex);
     };
 
     this.updateTail = function () {
@@ -78,7 +87,7 @@ function Snake() {
                 var segment = spine.segments[index];
 
                 var delta = new Point();
-                delta.length = width / 2;
+                delta.length = width / 2 + calcWidth(index, swallowIndex);
                 delta.angle = segment.direction + 90;
                 var top = segment.point + delta;
                 var bottom = segment.point - delta;
@@ -92,6 +101,12 @@ function Snake() {
         })
     };
 
+    function calcWidth (index, swallowIndex) {
+        var l = (5/SPEED) * 10;
+        var p = (Math.abs(swallowIndex - index) < l) ? (l - Math.abs(swallowIndex - index)) / l : 0;
+        p *= Math.PI / 2;
+        return Math.sin(p) * l * 2.5 * (index / pointsTotal) * (SPEED/5);
+    }
 
     function createSpine() {
         var tail = new Path();
@@ -123,9 +138,9 @@ function Snake() {
 
         head.transformContent = false;
 
-        var shape = new Shape.Circle(startPoint, width / 2);
-        shape.fillColor = baseColor;
-        head.addChild(shape);
+        head.shape = new Shape.Circle(startPoint, width / 2);
+        head.shape.fillColor = baseColor;
+        head.addChild(head.shape);
 
         var eye1 = new Shape.Circle(startPoint, width / 8);
         eye1.fillColor = 'white';
@@ -144,7 +159,7 @@ function Snake() {
     }
 
     function createTail() {
-        var tail = new Path.Circle(startPoint, width / 2);
+        var tail = new Shape.Circle(startPoint, width / 2);
         tail.fillColor = baseColor;
         return tail;
     }
@@ -187,8 +202,32 @@ prey.release = function () {
 prey.reset = function () {
     this.release();
     this.life = this.lifeSpan;
-    this.position = Point.random() * view.size / 2 + view.size / 4;
-    this.rotation = (view.center - this.position).angle;
+
+    // Random origin:
+    var axis = Math.round(Math.random());
+    var edge = Math.round(Math.random());
+    var perc = Math.random();
+
+    if (axis == 0) {
+        this.position.x = edge * view.bounds.width;
+        this.position.y = perc * view.bounds.height;
+    }
+    else {
+        this.position.x = perc * view.bounds.width;
+        this.position.y = edge * view.bounds.height;
+    }
+
+    var dest = new Point();
+    if (axis == 0) {
+        dest.x = view.bounds.width / 2;
+        dest.y = (1-Math.round(perc)) * view.bounds.height;
+    }
+    else {
+        dest.x = (1-Math.round(perc)) * view.bounds.width;
+        dest.y = view.bounds.height / 2;
+    }
+
+    this.rotation = (dest - this.position).angle - 180;
 };
 
 prey.onMouseDown = function () {
@@ -210,6 +249,12 @@ prey.move = function (frame) {
 };
 
 
+var querySpeed = parseInt(window.location.search.substr(1));
+if (!isNaN(querySpeed)) {
+    SPEED = querySpeed;
+}
+
+
 var snake = new Snake();
 prey.reset();
 
@@ -228,15 +273,14 @@ function onMouseUp () {
 
 function onFrame(event) {
     snake.update(event.count);
-    if ((prey.position - snake.head.position).length < 20) {
-        // prey.eaten = true;
+    if ((prey.position - snake.head.position).length < 40) {
         prey.reset();
+        snake.eat();
     }
     else if (!prey.caught) {
         prey.move(event.count);
     }
 }
-
 
 
 
