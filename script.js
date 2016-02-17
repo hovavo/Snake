@@ -18,10 +18,13 @@ function Snake() {
     this.target = view.center;
     this.swallowPointIndex = -1;
 
+    this.eating = false;
+
     this.eat = function () {
+        this.eating = true;
         this.swallowPointIndex = pointsTotal - 1;
         var vec = this.head.velocity.clone();
-        vec.length = speed * 10;
+        vec.length = speed * 30;
         this.target = this.head.position + vec;
     };
 
@@ -29,7 +32,17 @@ function Snake() {
         var delta = this.target - this.head.position;
         if (delta.length > speed) {
             this.steer(delta, frame);
-            this.swallowPointIndex -= 0.5;
+
+            if (this.eating) {
+                this.swallowPointIndex -= 0.5;
+                if (this.swallowPointIndex < 0)
+                    this.eating = false;
+            }
+            else if (prey.caught) {
+                if (delta.length < speed * 10) {
+                    this.swallowPointIndex = Math.round(delta.length / speed) + pointsTotal;
+                }
+            }
         }
         else {
             this.target = Point.random() * view.size;
@@ -265,11 +278,13 @@ prey.reset();
 
 
 function onMouseDown(event) {
-    snake.target = event.point;
+    if (!prey.caught)
+        snake.target = event.point;
 }
 
 function onMouseDrag(event) {
-    snake.target = event.point;
+    if (!prey.caught)
+        snake.target = event.point;
 }
 
 function onMouseUp() {
@@ -278,7 +293,7 @@ function onMouseUp() {
 
 function onFrame(event) {
     snake.update(event.count);
-    if ((prey.position - snake.head.position).length < 40) {
+    if ((prey.position - snake.head.position).length < SPEED*2) {
         prey.reset();
         snake.eat();
     }
