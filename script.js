@@ -198,9 +198,6 @@ prey.transformContent = false;
 prey.lifeSpan = 200;
 prey.scaling = 0.8;
 
-prey.walkSound = new Audio('sound/pig-walk.mp3');
-prey.walkSound.loop = true;
-
 prey.onFrame = function () {
     if (!this.caught) {
         this.life--;
@@ -217,7 +214,6 @@ prey.catch = function () {
     this.scaling = 1.2;
     this.caught = true;
     snake.target = this.position;
-    this.walkSound.pause();
 };
 
 prey.release = function () {
@@ -225,8 +221,6 @@ prey.release = function () {
     this.deadSkin.visible = false;
     this.scaling = 1;
     this.caught = false;
-    this.walkSound.play();
-
 };
 
 prey.reset = function () {
